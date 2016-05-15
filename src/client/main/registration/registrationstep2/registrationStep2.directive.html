@@ -1,0 +1,79 @@
+<md-content layout-padding>
+	<md-toolbar class="md-hue-1">
+      <span flex></span>
+      <h2 class="md-toolbar-tools">
+        <span class="md-flex">Step 2 of 3</span>
+      </h2>
+    </md-toolbar>
+
+	<form name="userForm" ng-submit="submit()" ng-cloak>
+	<p>Are you an existing customer?</p>
+    <md-radio-group ng-model="data.group1">
+      <md-radio-button id="yup" value="yup" class="md-primary">yup</md-radio-button>
+      <md-radio-button id="nope" value="nope" class="md-primary">nope</md-radio-button>
+    </md-radio-group>
+    
+    <div ng-show="data.group1 == 'yup'">
+     
+    <div layout-gt-xs="row">
+    <md-input-container class="md-block" flex-gt-sm>
+      <label>Postal Code</label>
+      <input name="postalCode" ng-model="vm.model.zipcode" required ng-pattern="/^[0-9]{5}$/" md-maxlength="5">
+      <div ng-messages="userForm.postalCode.$error" role="alert" multiple>
+        <div ng-message="required" class="my-message">You must supply a postal code.</div>
+        <div ng-message="pattern" class="my-message">That doesn't look like a valid postal code.</div>
+      </div>
+    </md-input-container>
+    </div>
+
+    <div layout-gt-xs="row">
+    <md-input-container flex-gt-xs>
+      <label>Phone Number (### ### ####)</label>
+      <input name="phone" ng-model="vm.model.phone" required ng-pattern="/^[0-9]{3}\s[0-9]{3}\s[0-9]{4}$/" md-maxlength="12">
+      <div ng-messages="userForm.phone.$error" role="alert" multiple>
+        <div ng-message="required" class="my-message">You must supply a phone number.</div>
+        <div ng-message="pattern" class="my-message">That doesn't look like a valid phone number.</div>
+      </div>
+    </md-input-container>
+    </div>
+
+    <div layout-gt-xs="row">
+    <md-checkbox ng-model="data.cb1" aria-label="Checkbox 1" ng-model="vm.model.textme">
+      Text me about power outages in my area. {{ data.cb1 }}
+    </md-checkbox>
+    </div>
+
+    <div layout-gt-xs="row">
+    <md-checkbox ng-model="data.cb2" aria-label="Checkbox 1" ng-model="vm.model.terms">
+      I have read and agree to the <a href="#">terms and conditions</a>. {{ data.cb2 }}
+    </md-checkbox>
+    </div>
+    </div>
+
+    <div ng-show="data.group1 == 'nope'">
+    <div layout-gt-xs="row">
+    <md-input-container ng-show="existing == nope" flex-gt-xs>
+      <label>Email Address</label>
+      <input ng-model="vm.model.email" type="email">
+    </md-input-container>
+    </div>
+
+    <div layout-gt-xs="row">
+    <md-checkbox ng-show="existing == nope" ng-model="data.cb3" aria-label="Checkbox 1">
+      I have read and agree to the <a href="#">terms and conditions</a>. {{ data.cb3 }}
+    </md-checkbox>
+    </div>
+    </div>
+
+	<md-toolbar class="md-hue-1">
+      <span flex></span>
+      <h2 class="md-toolbar-tools md-toolbar-tools-bottom">
+        
+        <md-button class="md-primary" ui-sref="registration.step1">Go to Step 1</md-button>
+      	<span flex></span>
+      	<md-button class="md-primary" ui-sref="registration.step3" ng-disabled="userForm.$invalid">Go to Step 3</md-button>
+
+      </h2>
+    </md-toolbar>
+
+</md-content>

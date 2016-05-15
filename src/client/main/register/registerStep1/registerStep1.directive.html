@@ -1,0 +1,65 @@
+<md-content layout-padding>
+	<div layout-xs hide-gt-xs layout-padding layout="row">
+		<div layout="column" flex="10"></div>
+		<div layout="column" flex="80">
+			<div layout="row">
+				<div layout="column">
+				<h1>register mobile</h1>
+
+				</div>
+			</div>
+		</div>
+		<div layout="column" flex="10"></div>
+	</div>
+
+	<div layout-gt-sm layout-padding>
+		<div layout="column" flex="10"></div>
+
+			<div layout="row" flex="100">
+				<div flex="66">
+				<h1>CREATE AN ACCOUNT</h1>
+					<form name="userForm" novalidate layout-padding>
+						<div layout-gt-xs="row">
+							<md-input-container md-no-float flex-gt-xs>
+								<input placeholder="Email" required ng-model="vm.email" type="email">
+							</md-input-container>
+						</div>
+						<div layout-gt-xs="row">
+							<md-input-container md-no-float flex-gt-xs>
+								<input placeholder="Password" required ng-model="vm.password" type="password">
+							</md-input-container>
+						</div>
+						<div layout-gt-xs="row">
+							<md-input-container md-no-float flex-gt-xs>
+								<input placeholder="Confirm Password" required ng-model="vm.password2" type="password">
+							</md-input-container>
+						</div>
+						<div layout-gt-xs="row">
+						    <div flex><md-checkbox required ng-model="data.cb2" aria-label="Checkbox 1">
+						      I have read and agree to the <a href="#">terms and conditions</a>. {{ data.cb2 }}
+						    </md-checkbox></div>
+					    </div>
+					    <div layout-gt-xs="row">
+					    	<md-button ng-hide="vm.loading" type="submit" class="md-primary md-raised" ng-disabled="userForm.$invalid" ng-click="vm.onSubmit()">Submit</md-button>
+					    </div>
+					</form>
+
+					<div layout="row" layout-sm="column" layout-align="space-around">
+					    <md-progress-circular ng-show="vm.loading" md-mode="indeterminate"></md-progress-circular>
+					</div>
+
+					</div>
+	 			<div flex="33">
+	 				<h3>Account Number</h3>
+	 				<p>{{vm.account}}</p>
+	 				<br>
+					<h3>Service Address</h3>
+					<p>{{vm.address}}</p>
+					<p>{{vm.city}}, {{vm.state}} {{vm.zip}}</p>
+				</div>
+					
+									
+			</div>
+		<div layout="column" flex="10"></div>
+	</div>
+</md-content>

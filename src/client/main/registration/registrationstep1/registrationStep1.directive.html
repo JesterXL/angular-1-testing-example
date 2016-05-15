@@ -1,0 +1,40 @@
+<md-content>
+	<md-toolbar class="md-hue-2">
+      <span flex></span>
+      <h2 class="md-toolbar-tools">
+        <span class="md-flex">Step 1 of 3</span>
+      </h2>
+    </md-toolbar>
+
+    <form name="userForm" novalidate layout-padding>
+		<div layout-gt-xs="row">
+			<md-input-container flex-gt-xs>
+				<label>Email</label>
+				<input required ng-model="vm.model.email" type="email">
+			</md-input-container>
+		</div>
+		<div layout-gt-xs="row">
+			<md-input-container flex-gt-xs>
+				<label>Password</label>
+				<input required ng-model="vm.model.password" type="password">
+			</md-input-container>
+		</div>
+		<div layout-gt-xs="row">
+			<md-input-container flex-gt-xs>
+				<label>Password Again</label>
+				<input required ng-model="vm.model.password2" type="password">
+			</md-input-container>
+		</div>
+	</form>
+	
+	<md-toolbar class="md-hue-2">
+      <span flex></span>
+      <h2 class="md-toolbar-tools md-toolbar-tools-bottom">
+      	
+		<md-button class="md-primary" ui-sref="home">Go Home</md-button>
+      	<span flex></span>
+      	<md-button class="md-primary" ui-sref="registration.step2" ng-disabled="userForm.$invalid">Next<md-icon md-svg-icon="rightarrow" aria-label="Step 2"></md-icon></md-button>
+      </h2>
+    </md-toolbar>
+
+</md-content>
