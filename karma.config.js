@@ -2,6 +2,7 @@ var fs = require('fs');
 var path = require('path');
 var wiredep = require('wiredep');
 var BUILD_CONFIG = require('./build.config.js');
+var _ = require('lodash');
 
 var files = [];
 
@@ -21,6 +22,17 @@ if (bowerComponents) {
 }
 files = files.concat(BUILD_CONFIG.client.sourceFiles);
 files = files.concat(BUILD_CONFIG.client.templateFiles);
+var excludedFiles = _.filter(files, function(item)
+{
+	return item.indexOf("!") > -1 && item.indexOf('spec') === -1;
+});
+excludedFiles = excludedFiles.concat(BUILD_CONFIG.client.mediaFiles);
+excludedFiles = _.map(excludedFiles, function(file)
+{
+	file = file.split("!").join("");
+	return file;
+});
+
 // console.log("files:", files);
 module.exports = function(config) {
     'use strict';
@@ -41,7 +53,7 @@ module.exports = function(config) {
                 ui: 'bdd'
             }
         },
-        exclude: ['**/*.protractor.js', '**/client/features/**', '**/*.svg'],
+        exclude: excludedFiles,
         port: 8180,
         browsers: ['PhantomJS'],
         singleRun: true,
@@ -49,9 +61,10 @@ module.exports = function(config) {
         colors: true,
         logLevel: config.LOG_ERROR,
         // reporters: ['nyan', 'coverage', 'threshold'],
+        reporters: ['mocha', 'coverage', 'threshold'],
         // reporters: ['dots', 'coverage', 'threshold'],
         // reporters: ['nyan'],
-        reporters: ['mocha'],
+        // reporters: ['mocha'],
         // reporters: ['dots'],
         plugins: [
             'karma-chai',
@@ -83,30 +96,30 @@ module.exports = function(config) {
             ],
             check: {
             	global: {
-			      statements: 60,
-			      branches: 60,
-			      functions: 60,
-			      lines: 60
+			      statements: 50,
+			      branches: 50,
+			      functions: 50,
+			      lines: 50
 			    }
             },
             watermarks: {
-				statements: [ 60, 70 ],
-				functions: [ 60, 70 ],
-				branches: [ 60, 70 ],
-				lines: [ 60, 70 ]
+				statements: [ 50, 60 ],
+				functions: [ 50, 60 ],
+				branches: [ 50, 60 ],
+				lines: [ 50, 60 ]
 			}
         },
 
         thresholdReporter: {
-            statements: 60,
-            branches: 60,
-            functions: 60,
-            lines: 60
+            statements: 50,
+            branches: 50,
+            functions: 50,
+            lines: 50
         },
 
         ngHtml2JsPreprocessor: {
             moduleName: BUILD_CONFIG.client.moduleName,
-            stripPrefix: 'src/client/'
+            stripPrefix: 'src/'
         }
     });
 };

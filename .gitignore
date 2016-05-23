@@ -1,0 +1,9 @@
+/node_modules/
+/build/
+/bower_components/
+.DS_Store
+.idea/
+/coverage/
+/coverage_node/
+/karma_test_results/
+eslint_report.html

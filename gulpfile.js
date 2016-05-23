@@ -8,14 +8,10 @@ var wiredep             = require('wiredep').stream;
 var inject              = require('gulp-inject');
 var complexity          = require('gulp-complexity');
 var karma               = require('karma').server;
-//var mochaLcovReporter   = require('mocha-lcov-reporter');
-//var coverage            = require('gulp-coverage');
 var open                = require('gulp-open');
-//var istanbul            = require('gulp-istanbul');
 var gutil               = require('gulp-util');
 var uglify              = require('gulp-uglify');
 var ngAnnotate          = require('gulp-ng-annotate');
-//var size                = require('gulp-size');
 var ngTemplates         = require('gulp-ng-templates');
 var htmlmin             = require('gulp-htmlmin');
 var exec                = require('child_process').exec;
@@ -26,11 +22,15 @@ var argv                = require('yargs').argv;
 var _                   = require('lodash');
 var es 					= require('event-stream');
 var runSequence 		= require('run-sequence');
+var eslintReporter 		= require('eslint-html-reporter');
+var fs 					= require('fs');
+var path 				= require('path');
+var gutil 				= require('gulp-util');
 
-var CONFIG              = require('./build.config');
+const CONFIG            = require('./build.config');
 
 var wiredepOptions = {
-	ignorePath: "../../",
+	ignorePath: "../",
 	exclude : [
 		"bower_components/stackframe/stackframe.js",
 		"bower_components/error-stack-parser/error-stack-parser.js",
@@ -40,29 +40,13 @@ var wiredepOptions = {
 	]
 };
 
-function onBuildError(reason)
-{
-	console.error("onBuildError:", reason);
-	process.exit(1);
-}
-
-function onBuildWarning(reason)
-{
-	console.warn("onBuildWarning:", reason);
-}
-
 // tells you everything wrong with your code, quickly. Format, styling, and complexity.
-gulp.task('analyze', ['analyzeClient', 'complexityClient']);
+gulp.task('analyze', ['complexityClient']);
 
-gulp.task('complexityClient', () =>
+gulp.task('complexityClient', ['analyzeClient'], () =>
 {
-	var files = _.remove(CONFIG.client.jsFiles, (filepath)=>
-	{
-		return _.includes(CONFIG.complexityExcludedFiles, (excludeFile)=>
-		{
-			return filepath === excludeFile;
-		});
-	});
+	var files = CONFIG.client.jsFiles;
+	//console.log("files:", files);
 	return gulp.src(files)
 	.pipe(complexity(CONFIG.complexity));
 });
@@ -72,7 +56,7 @@ gulp.task('analyzeClient', () =>
 	var files = CONFIG.client.jsFiles;
 	files = files.concat(CONFIG.client.testFiles);
 	files = files.concat(CONFIG.client.protractorFiles);
-	files.push('!*.css', '!**/*.css', '!*.svg', '!**/*.svg');
+	files = files.concat(CONFIG.client.mediaFiles);
 	return gulp.src(files)
     .pipe(eslint({
         extends: 'eslint:recommended',
@@ -99,13 +83,20 @@ gulp.task('analyzeClient', () =>
             '_': true,
             'moment': true,
             'io': true,
-            'google': true
+            'google': true,
+            'd3': true,
+            'dc': true,
+            'crossfilter': true
         },
         envs: [
             'browser'
         ]
     }))
-    .pipe(eslint.format())
+    .pipe(eslint.format('stylish'))
+    .pipe(eslint.format(eslintReporter, function(results)
+    {
+    	fs.writeFileSync(path.join(__dirname, 'eslint_report.html'), results);
+    }))
     .pipe(eslint.failAfterError());
 });
 
@@ -125,8 +116,20 @@ gulp.task('test', function(done)
 
 gulp.task('showClientCoverage', function()
 {
-	gulp.src('./coverage/html/index.html')
+	return gulp.src('./coverage/html/index.html')
         .pipe(open());
+});
+
+gulp.task('showTestResults', function()
+{
+	return gulp.src('./karma_test_results/report-summary-filename/index.html')
+	.pipe(open());
+});
+
+gulp.task('showAnalyzeReport', function()
+{
+	return gulp.src('./eslint_report.html')
+	.pipe(open());
 });
 
 // shows your code coverage in HTML report form for Client and Node
@@ -187,17 +190,6 @@ gulp.task('startSelenium', ()=>
 gulp.task('endtoend', ()=>
 {
 	var featureFiles = CONFIG.bdd.featureFiles;
-	if(_.isUndefined(argv.f) === false && _.isString(argv.f))
-	{
-		featureFiles = [CONFIG.bdd.sourceDirectory + argv.f + '.feature'];	
-	}
-
-	var specs = featureFiles.join(',');
-	var argsArray = [
-		"--specs", specs
-	];
-	console.log("argsArray:", argsArray);
-
 	// cat tests/features/cucumber_report.json | ./node_modules/.bin/cucumber-junit > tests/features/cucumber_report.xml
 	return gulp.src(featureFiles)
         .pipe(protractor({
@@ -231,22 +223,12 @@ function getBowerComponents()
 	return require('wiredep')(wiredepOptions);
 }
 
-gulp.task('showWiredepComponents', () =>
-{
-	console.log(getBowerComponents());
-});
-
 // copies all the files you need for a dev build. Missing prod for now.
 gulp.task('copy', ['clean'], function()
 {
-    // NOTE: doesn't work, task never completes, I give up.
-    // All streams above work fine if you return individually,
-    // so it's something wrong with merge.
-    // return merge(htmlStream, jsStream, templateStream);
-    
     return new Promise(function(resolve, reject)
     {
-        gulp.src('src/client/index.html')
+        gulp.src('src/index.html')
         .pipe(wiredep(wiredepOptions))
         .pipe(gulp.dest('./build'))
         .on('end', resolve)
@@ -287,8 +269,9 @@ function getInjectStream()
 		console.log(sourceFiles);
 		var both = sourceFiles.concat(wiredepSources.css);
 		var sources = gulp.src(both, {read: false});
+		//console.log("both:", both);
 		return gulp.src('./build/index.html')
-		.pipe(inject(sources, {ignorePath: '/src/client/'}))
+		.pipe(inject(sources, {ignorePath: '/src/'}))
 		.pipe(gulp.dest('./build'));
 	}
 	catch(err)
@@ -373,7 +356,7 @@ function copyBowerCSS()
 function copyIndex()
 {
 	console.log("copyIndex::starting...");
-	return gulp.src(['src/client/index.html', 'src/client/fireStarter.css', 'src/static/favicon.ico'])
+	return gulp.src(['src/index.html'])
 		.pipe(gulp.dest(CONFIG.client.buildProdDirectory))
 		.on('end', ()=>
 		{
@@ -395,7 +378,7 @@ function injectProductionCode()
 	var combinedCode = gulp.src(sources, {read: false});
 	return gulp.src(CONFIG.client.buildProdDirectory + '/index.html')
 		.pipe(inject(combinedCode, {
-										ignorePath: ['/src/client/', '/build/'],
+										ignorePath: ['/src/', '/build/'],
 										addRootSlash: false
 									}))
 		.pipe(gulp.dest(CONFIG.client.buildProdDirectory))
@@ -446,11 +429,11 @@ gulp.task('browserSync', ['inject'], function()
 	browserSync.init({
         proxy: "http://localhost:" + CONFIG.staticServer.port
     });
-    gulp.watch(["src/client/*.js",
-    			"src/client/*.html",
-    			"src/client/*.css",
-    			"src/client/**/*.js",
-    			"src/client/**/*.html"], ['injectBrowserSync'])
+    gulp.watch(["src/*.js",
+    			"src/*.html",
+    			"src/*.css",
+    			"src/**/*.js",
+    			"src/**/*.html"], ['injectBrowserSync'])
    .on("change", function()
    	{
    		console.log("gulp task::browserSync, reloading...");
@@ -469,6 +452,13 @@ gulp.task('open', function(done)
     }, 2000);
 });
 
+gulp.task('server', function (cb)
+{
+  exec('node server-static.js', function (err, stdout, stderr) {
+    cb(err);
+  });
+  });
+
 function runCommand(command) {
   return function (cb) {
     exec(command, function (err, stdout, stderr) {
@@ -478,9 +468,6 @@ function runCommand(command) {
     });
   }
 }
-
-gulp.task('start-static-server', runCommand('node src/static/app'));
-gulp.task('start-webdriver', runCommand('webdriver-manager start'));
 
 // git-r-done
 gulp.task('default', ['browserSync']);
