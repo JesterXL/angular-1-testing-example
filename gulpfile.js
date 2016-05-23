@@ -454,10 +454,17 @@ gulp.task('open', function(done)
 
 gulp.task('server', function (cb)
 {
-  exec('node server-static.js', function (err, stdout, stderr) {
-    cb(err);
-  });
-  });
+	exec('node server-static.js', function (err, stdout, stderr) {
+		cb(err);
+	});
+});
+
+gulp.task('api', function(cb)
+{
+	exec('node api.js', function (err, stdout, stderr) {
+		cb(err);
+	});
+});
 
 function runCommand(command) {
   return function (cb) {

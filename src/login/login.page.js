@@ -4,7 +4,7 @@ var expect   = chai.expect;
 
 function go()
 {
-	return browser.get('http://localhost:3001/#/login');
+	return browser.get('http://localhost:3000/#/login');
 }
 
 function setUsername(value)

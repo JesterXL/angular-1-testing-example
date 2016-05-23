@@ -5,13 +5,18 @@ angular.module('demo.login')
 
 function jxlLogin($window)
 {
-	// console.log("jxlLogin::constructor");
+	console.log("jxlLogin::constructor");
 	function link(scope, element, attrs)
 	{
+		console.log("link function");
+		console.log("$window.componentHandler:", $window.componentHandler);
+		console.log("window.componentHandler:", window.componentHandler);
 		_.forEach(document.querySelectorAll('.mdl-textfield'), function(txt)
 		{
+			console.log("looping through fields");
 			if($window.componentHandler && $window.componentHandler.upgradeElement)
 			{
+				console.log("and upgrading");
 				$window.componentHandler.upgradeElement(txt);
 			}
 		});
